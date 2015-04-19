@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <title></title>
+    <script src="./src/jquery.js"></script>
+    <script src="./src/main.js"></script>
+    <style>
+      #freqVal {
+        width: 500px;
+      }
+      #piano {
+        position: relative;
+      }
+      #piano .key {
+        cursor: default;
+        text-align: center;
+        top: 0;
+        position: absolute;
+        padding-top: 70px;
+        height: 50px;
+        display: inline-block;
+        width: 15px;
+        font-size: 5px;
+        border: 1px solid black;
+      }
+      #piano .key.black {
+        height: 65px;
+        z-index: 10;
+        position: absolute;
+        width: 8px;
+        padding-top: 0px;
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="text" readonly id='printFreq' value="440"/>Hz<br />
+    Volume: <input type="range" min="0" max="1" step="0.01" id="level" value='0.1'/>
+    <label><input type="radio" name='wavetype' class='wavetype' value='sine' checked>サイン波</option></label>
+    <label><input type="radio" name='wavetype' class='wavetype' value='square'>矩形波</option></label>
+    <label><input type="radio" name='wavetype' class='wavetype' value='sawtooth'>鋸歯状波</option></label>
+    <label><input type="radio" name='wavetype' class='wavetype' value='triangle'>三角波</option></label>
+    <div id="piano">
+
+    </div>
+  </body>
+</html>
