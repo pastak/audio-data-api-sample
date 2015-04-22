@@ -1,20 +1,30 @@
 $(function(){
   var playSound = function(freq){
-    if(nowPlay === 0){
-      osc.start(0);
-      nowPlay = 1;
-    }
     var freq = freq;
     if(typeof freq != 'number'){
       freq = parseFloat(document.getElementById("printFreq").value);
     }else{
       document.getElementById("printFreq").value = freq;
     }
+
     osc.type = $('.wavetype:checked').val();
     var level = parseFloat(document.getElementById("level").value);
+    var steps = Number(document.getElementById("step").value)
     osc.frequency.value = freq;
     gain.gain.value = level;
+    var curve = new Float32Array(4096);
+    for(var i = 0; i < 4096; ++i) {
+      curve[i] = (((i/4096) * steps)|0)/(steps-1)*2-1;
+    }
+    shaper.curve = curve;
+    if(nowPlay === 0){
+      osc.start(0);
+      nowPlay = 1;
+    }
   };
+  var pauseSound = function(){
+    gain.gain.value = 0.0;
+  }
   var createKeyDOM = function(option){
     var key = $('<div class="key">');
     keyCode = option.keyCode;
@@ -30,9 +40,16 @@ $(function(){
       keyPosition -= 11;
     }
     key.html(keyCode+"<br />"+jpName);
-    key.on('click', (function(index){
-      return function(){
+    key.on('mousedown', (function(index){
+
+      return function(event){
+        event.stopPropagation();
         playSound( 440 * Math.pow(2,(index - 40)/12) )
+      }
+    })(option.index))
+    key.on('mouseup', (function(index){
+      return function(){
+        pauseSound()
       }
     })(option.index))
     return key;
@@ -41,23 +58,23 @@ $(function(){
   var audioctx = new AudioContext();
   var osc = audioctx.createOscillator();
   var gain = audioctx.createGain();
+  var shaper = audioctx.createWaveShaper();
   var nowPlay = 0;
   var keyPosition = -10;
   osc.connect(gain);
-  gain.connect(audioctx.destination);
-  $('#level').on('change', playSound);
-  $('.wavetype').on('click',playSound);
+  gain.connect(shaper);
+  shaper.connect(audioctx.destination);
 
   //create Piano Keyboads
   var soundName = ['ド','レ','ミ','ファ','ソ','ラ','シ']
-  for(var index = 0; index < 72; index++){
+  for(var i = 0, nameIndex = 0; i < 115; i++, nameIndex++){
     var key = $('<div class="key">');
-    var keyCode = String.fromCharCode(((index+2)%7+65));
-    var jpName = soundName[(index+7)%7];
+    var keyCode = String.fromCharCode(((nameIndex+5)%7+65));
+    var jpName = soundName[(nameIndex+3)%7];
     $('#piano').append(createKeyDOM({
       keyCode: keyCode,
       jpName: jpName,
-      index: index
+      index: i
     }))
     switch(keyCode){
       case "A":
@@ -68,7 +85,7 @@ $(function(){
       $('#piano').append(createKeyDOM({
         keyCode: keyCode,
         jpName: jpName,
-        index: (index+1),
+        index: (++i),
         black: true
       }))
     }
